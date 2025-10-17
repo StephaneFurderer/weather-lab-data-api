@@ -17,7 +17,10 @@ class FetchService:
 
     def get_data_for_date(self, date: str, force: bool = False) -> dict:
         df = self.fetcher.download_hurricane_data(date, force_download=force)
-        records = dataframe_to_records(df)
+        if df is None:
+            records = []
+        else:
+            records = dataframe_to_records(df)
         meta = {
             'date': date,
             'record_count': len(records),

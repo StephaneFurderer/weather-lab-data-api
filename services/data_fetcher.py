@@ -115,6 +115,9 @@ class HurricaneDataFetcher:
         
         # Group by track_id to get hurricane summaries
         for track_id, group in df.groupby('track_id'):
+            # Convert valid_time to datetime for proper min/max operations
+            valid_times = pd.to_datetime(group['valid_time'])
+            
             hurricane_info = {
                 'track_id': track_id,
                 'records': len(group),
@@ -122,7 +125,8 @@ class HurricaneDataFetcher:
                 'min_pressure': group['minimum_sea_level_pressure_hpa'].min(),
                 'lat_range': (group['lat'].min(), group['lat'].max()),
                 'lon_range': (group['lon'].min(), group['lon'].max()),
-                'time_range': (group['valid_time'].min(), group['valid_time'].max()),
+                'time_range': (valid_times.min().strftime('%Y-%m-%d %H:%M:%S'), 
+                              valid_times.max().strftime('%Y-%m-%d %H:%M:%S')),
                 'has_radius_data': any(group['radius_34_knot_winds_ne_km'].notna())
             }
             summary['hurricanes'][track_id] = hurricane_info
