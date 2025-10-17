@@ -80,6 +80,7 @@ class HurricaneDataFetcher:
             csv_buffer = io.StringIO(csv_content)
             df = pd.read_csv(csv_buffer)
             logger.info(f"Downloaded {len(df)} records for {date}")
+            # Force Railway redeploy
             return df
             
         except requests.exceptions.RequestException as e:
