@@ -3,6 +3,7 @@ Data fetcher module for downloading hurricane track data from Google DeepMind We
 """
 
 import os
+import io
 import pandas as pd
 import requests
 from datetime import datetime, timedelta
@@ -63,8 +64,21 @@ class HurricaneDataFetcher:
             response = self.session.get(url, timeout=30)
             response.raise_for_status()
             
-            # Read CSV directly from response content
-            df = pd.read_csv(response.content)
+            # Convert bytes to string and filter out comment lines efficiently
+            content_str = response.content.decode('utf-8')
+            
+            # Process line by line to avoid memory issues with very large files
+            data_lines = []
+            for line in content_str.split('\n'):
+                if line.strip() and not line.strip().startswith('#'):
+                    data_lines.append(line)
+            
+            # Join only the data lines
+            csv_content = '\n'.join(data_lines)
+            
+            # Create file-like object and read CSV
+            csv_buffer = io.StringIO(csv_content)
+            df = pd.read_csv(csv_buffer)
             logger.info(f"Downloaded {len(df)} records for {date}")
             return df
             
@@ -73,6 +87,9 @@ class HurricaneDataFetcher:
             return None
         except Exception as e:
             logger.error(f"Error processing data for {date}: {e}")
+            logger.error(f"Error type: {type(e).__name__}")
+            if hasattr(e, 'errno'):
+                logger.error(f"Error number: {e.errno}")
             return None
     
     
