@@ -30,7 +30,7 @@ def get_data(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/data-range")
+@router.get("/data-range")
 def get_data_range(
     start: str = Query(..., description="Start date in YYYY-MM-DD format"),
     end: Optional[str] = Query(None, description="End date in YYYY-MM-DD format"),

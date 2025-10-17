@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 
-from data_fetcher import HurricaneDataFetcher
+from services.data_fetcher import HurricaneDataFetcher
 
 from utils.serialize import dataframe_to_records
 
