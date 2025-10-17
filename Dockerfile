@@ -17,7 +17,7 @@ ENV PYTHONPATH=/app/..:$PYTHONPATH
 # Expose port (Railway provides PORT env)
 EXPOSE 8000
 
-# Run the app
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${PORT:-8000}"]
+# Run the app (shell form so ${PORT} expands on Railway)
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
 
 
