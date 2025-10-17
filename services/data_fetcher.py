@@ -99,6 +99,13 @@ class HurricaneDataFetcher:
         if df is None or df.empty:
             return {}
         
+        return self._create_summary_from_dataframe(df, date)
+    
+    def _create_summary_from_dataframe(self, df: pd.DataFrame, date: str = None) -> Dict:
+        """Create summary from an existing DataFrame."""
+        if df is None or df.empty:
+            return {}
+        
         summary = {
             'date': date,
             'total_records': len(df),

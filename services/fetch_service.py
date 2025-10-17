@@ -69,7 +69,13 @@ class FetchService:
         """Get hurricane summary for a specific date"""
         try:
             df = self.fetcher.download_hurricane_data(date)
-            summary = self.fetcher.get_hurricane_summary(df)
+            if df is None or df.empty:
+                return {
+                    'date': date,
+                    'summary': {},
+                    'error': 'No data available for this date'
+                }
+            summary = self.fetcher._create_summary_from_dataframe(df, date)
             return {
                 'date': date,
                 'summary': summary
@@ -77,7 +83,7 @@ class FetchService:
         except Exception as e:
             return {
                 'date': date,
-                'summary': None,
+                'summary': {},
                 'error': str(e)
             }
 
