@@ -109,7 +109,7 @@ class HurricaneDataFetcher:
         
         summary = {
             'date': date,
-            'total_records': len(df),
+            'total_records': int(len(df)),
             'hurricanes': {},
             'data_quality': {}
         }
@@ -119,28 +119,47 @@ class HurricaneDataFetcher:
             # Convert valid_time to datetime for proper min/max operations
             valid_times = pd.to_datetime(group['valid_time'])
             
+            # Ensure all values are Python native types
+            max_wind = group['maximum_sustained_wind_speed_knots'].max()
+            min_pressure = group['minimum_sea_level_pressure_hpa'].min()
+            lat_min, lat_max = group['lat'].min(), group['lat'].max()
+            lon_min, lon_max = group['lon'].min(), group['lon'].max()
+            has_radius = group['radius_34_knot_winds_ne_km'].notna().any()
+            
             hurricane_info = {
-                'track_id': track_id,
-                'records': len(group),
-                'max_wind_speed': group['maximum_sustained_wind_speed_knots'].max(),
-                'min_pressure': group['minimum_sea_level_pressure_hpa'].min(),
-                'lat_range': (group['lat'].min(), group['lat'].max()),
-                'lon_range': (group['lon'].min(), group['lon'].max()),
+                'track_id': str(track_id),
+                'records': int(len(group)),
+                'max_wind_speed': float(max_wind) if pd.notna(max_wind) else 0.0,
+                'min_pressure': float(min_pressure) if pd.notna(min_pressure) else 0.0,
+                'lat_range': (float(lat_min) if pd.notna(lat_min) else 0.0, 
+                             float(lat_max) if pd.notna(lat_max) else 0.0),
+                'lon_range': (float(lon_min) if pd.notna(lon_min) else 0.0, 
+                             float(lon_max) if pd.notna(lon_max) else 0.0),
                 'time_range': (valid_times.min().strftime('%Y-%m-%d %H:%M:%S'), 
                               valid_times.max().strftime('%Y-%m-%d %H:%M:%S')),
-                'has_radius_data': any(group['radius_34_knot_winds_ne_km'].notna())
+                'has_radius_data': bool(has_radius)
             }
-            summary['hurricanes'][track_id] = hurricane_info
+            summary['hurricanes'][str(track_id)] = hurricane_info
         
-        # Data quality metrics
+        # Data quality metrics - convert numpy types to Python types for JSON serialization
+        coord_check = df[['lat', 'lon']].notna().all().all()
+        wind_check = df['maximum_sustained_wind_speed_knots'].notna().all()
+        pressure_check = df['minimum_sea_level_pressure_hpa'].notna().all()
+        radius_check = df['radius_34_knot_winds_ne_km'].notna().any()
+        
+        lat_min, lat_max = df['lat'].min(), df['lat'].max()
+        lon_min, lon_max = df['lon'].min(), df['lon'].max()
+        
         summary['data_quality'] = {
-            'has_coordinates': df[['lat', 'lon']].notna().all().all(),
-            'has_wind_data': df['maximum_sustained_wind_speed_knots'].notna().all(),
-            'has_pressure_data': df['minimum_sea_level_pressure_hpa'].notna().all(),
-            'has_radius_data': df['radius_34_knot_winds_ne_km'].notna().any(),
+            'has_coordinates': bool(coord_check),
+            'has_wind_data': bool(wind_check),
+            'has_pressure_data': bool(pressure_check),
+            'has_radius_data': bool(radius_check),
             'coordinate_range': {
-                'lat': (df['lat'].min(), df['lat'].max()),
-                'lon': (df['lon'].min(), df['lon'].max())
+                'lat': (float(lat_min) if pd.notna(lat_min) else 0.0, 
+                        float(lat_max) if pd.notna(lat_max) else 0.0),
+                'lon': (float(lon_min) if pd.notna(lon_min) else 0.0, 
+                        float(lon_max) if pd.notna(lon_max) else 0.0)
             }
         }
         
