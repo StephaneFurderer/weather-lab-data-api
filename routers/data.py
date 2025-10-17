@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Query
 from datetime import datetime
 
-from ..services.fetch_service import FetchService
+from services.fetch_service import FetchService
 
 
 router = APIRouter()

@@ -4,7 +4,7 @@ from typing import Optional
 
 from data_fetcher import HurricaneDataFetcher
 
-from ..utils.serialize import dataframe_to_records
+from utils.serialize import dataframe_to_records
 
 
 class FetchService:

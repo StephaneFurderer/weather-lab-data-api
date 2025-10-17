@@ -5,7 +5,7 @@ FastAPI application entrypoint for WeatherLab Data API.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import data as data_router
+from routers import data as data_router
 
 
 def create_app() -> FastAPI:
